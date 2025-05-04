@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 
@@ -60,7 +58,7 @@ public class VoiceRecognitionWord : MonoBehaviour
         {
             Debug.LogWarning("Dictation completed unexpectedly: " + completionCause);
             dictationRecognizer.Stop();
-            dictationRecognizer.Start(); // reiniciar si se detiene
+            dictationRecognizer.Start();
         }
     }
 
