@@ -1,3 +1,4 @@
+using NUnit.Framework.Interfaces;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,10 +9,10 @@ public class PlayerController : MonoBehaviour
     ///--------------------------- <summary>
     /// Movement + camera
     /// </summary>
-    [Header("Movement Settings")]
+    [Header("Movement")]
     public float moveSpeed = 5f;
 
-    [Header("Camera Settings")]
+    [Header("Camera")]
     public float mouseSensitivity = 100f;
 
     private CharacterController characterController;
@@ -23,20 +24,23 @@ public class PlayerController : MonoBehaviour
     ///---------------------------
     /// Object Interactable
     /// </summary>
-    [Header("Interaction Settings")]
+    [Header("Interaction")]
     public float interactDistance = 3f;
     public LayerMask interactLayerMask;
     private Camera playerCamera;
     private GameObject item;
 
+
     ///---------------------------
     /// Object Interactable -> Mask
     /// </summary>
-    [Header("Outliner Materials")]
+    [Header("Outliner")]
     public Material materialOutliner;
 
     private GameObject lastHighlightedObject = null;
-    
+
+    public bool canMove = true;
+
 
     private void Awake()
     {
@@ -71,9 +75,12 @@ public class PlayerController : MonoBehaviour
     
     private void Update()
     {
-        HandleMovement();
-        HandleCameraRotation();
-        CheckForInteractableObject();
+        if (canMove)
+        {
+            HandleMovement();
+            HandleCameraRotation();
+            CheckForInteractableObject();
+        }
     }
 
     private void HandleMovement()
@@ -105,23 +112,76 @@ public class PlayerController : MonoBehaviour
                 if (hit.collider.TryGetComponent(out IInteractable interactable))
                 {
                     item = hit.transform.gameObject;
-                    
-                    interactable.Interact(playerCameraTransform);
+                    if (item.GetComponent<ActionDoor>() != null )
+                    {
+                        if (!item.GetComponent<ActionDoor>().usableOneTime)
+                        {
+                            interactable.Interact(playerCameraTransform);
+                        }
+                    }
+                    else 
+                    {
+                        interactable.Interact(playerCameraTransform);
+                    }
+
+                    if (item.GetComponent<TakeItem>() == null)
+                    {
+                        item = null;
+                    }
                 }
             }
         }
         else
         {
             if(item.GetComponent<TakeItem>() != null) {
+                if (item.tag == "Note")
+                {
+                    Debug.Log("Player Note");
+                    item.GetComponent<TakeItem>().Drop();
+                    item = null;
+                }
+                else
+                {
+                    Ray ray = playerCamera.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
 
-                item.GetComponent<TakeItem>().Drop();
-
-            } 
-            
-            item = null;
-
+                    if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayerMask))
+                    {
+                        if (hit.collider.TryGetComponent(out IInteractable interactable))
+                        {
+                            GameObject item2 = hit.transform.gameObject;
+                            if (item2.GetComponent<ActionDoor>() && item2.GetComponent<ActionDoor>().usableOneTime
+                                && item2.GetComponent<ActionDoor>().idUsable == item.GetComponent<TakeItem>().id)
+                            {
+                                interactable.Interact(playerCameraTransform);
+                                item.GetComponent<TakeItem>().DropDefinitive();
+                                item = null;
+                            }
+                            else if (item2.GetComponent<ActionDoor>() && !item2.GetComponent<ActionDoor>().usableOneTime)
+                            {
+                                interactable.Interact(playerCameraTransform);
+                            }
+                            else if (item2.GetComponent<TakeItem>())
+                            {
+                                item.GetComponent<TakeItem>().Drop();
+                                interactable.Interact(playerCameraTransform);
+                                item = item2;
+                            }
+                        }
+                        else
+                        {
+                            item.GetComponent<TakeItem>().Drop();
+                            item = null;
+                        }
+                    }
+                    else
+                    {
+                        item.GetComponent<TakeItem>().Drop();
+                        item = null;
+                    }
+                }
+                
+            }
         }
-        
     }
     void CheckForInteractableObject()
     {
@@ -148,7 +208,17 @@ public class PlayerController : MonoBehaviour
                         Material[] materials = objectRenderer.GetComponent<Renderer>().materials;
                         materials[1].SetFloat("_Alpha", 1f);
                         //objectRenderer.GetComponent<Renderer>().materials = materials;
+                        //
+                        //Revisar bug OutlinerEncendido al dejar de mirar
+                        if(lastHighlightedObject != null)
+                        {
+                            Material[] materials2 = lastHighlightedObject.GetComponent<Renderer>().materials;
+                            materials2[1].SetFloat("_Alpha", 0f);
+                            lastHighlightedObject.GetComponent<Renderer>().materials = materials;
+                        }
+                        //
                         lastHighlightedObject = objectRenderer;
+
                     }
                 }
             }
@@ -168,7 +238,17 @@ public class PlayerController : MonoBehaviour
                 lastHighlightedObject = null;
             }
         }
-    }
 
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.transform.tag == "Damage")
+        {
+            GetComponent<CharacterController>().enabled = false;
+            //transform.position = new Vector3(-9f, 3f, 3f);
+            transform.position = new Vector3(-38f, 3f, -3f);
+            GetComponent<CharacterController>().enabled = true;
+        }
+    }
 
 }
