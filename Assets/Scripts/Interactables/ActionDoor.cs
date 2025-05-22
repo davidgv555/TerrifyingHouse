@@ -1,20 +1,24 @@
 using UnityEngine;
 
-public class ActionDoor : MonoBehaviour, IInteractable
-{
+public class ActionDoor : InteractableBase
+{ 
     public float speed = 2f;
     public float angleOpen = 90f;
     public float angleClosed = 0f;
     public bool usableOneTime = false;
     public int idUsable;
+    public bool isOpen = false;
+
+    public override bool haveOutline => false;
 
     private Transform pivotDoor;
     private Quaternion rotationTarget;
-    private bool isOpen = false;
+    
 
     void Start()
     {
         pivotDoor = transform.parent;
+        myMaterials = GetComponent<Renderer>().materials;
     }
     void Update()
     {
@@ -28,7 +32,7 @@ public class ActionDoor : MonoBehaviour, IInteractable
         }
 
     }
-    public void Interact(Transform t)
+    public override void Interact(Transform t)
     {
         if (!usableOneTime)
         {
@@ -38,8 +42,13 @@ public class ActionDoor : MonoBehaviour, IInteractable
         {
             DoOnlyAction();
         }
-        
     }
+    /*
+    public void Interact(Transform t)
+    {
+        
+        
+    }*/
 
     private void DoActionDoor()
     {
@@ -61,4 +70,6 @@ public class ActionDoor : MonoBehaviour, IInteractable
         rotationTarget = Quaternion.Euler(0, angleOpen, 0);
         this.gameObject.layer = 0;
     }
+
+    
 }

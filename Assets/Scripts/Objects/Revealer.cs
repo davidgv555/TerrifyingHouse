@@ -21,24 +21,24 @@ public class Revealer : MonoBehaviour
     {
         render.material = revealedMaterial;
 
-        if (hideCoroutine != null)
+        /*if (hideCoroutine != null)
         {
             StopCoroutine(hideCoroutine);
-        }
+        }*/
 
-        hideCoroutine = StartCoroutine(HideAfterDelay());
     }
-
-    
-    public void DesactiveReveal()
+    public void Hide()
     {
+        //hideCoroutine = StartCoroutine(HideAfterDelay());
         render.material = hiddenMaterial;
     }
-    private IEnumerator HideAfterDelay()
+
+ 
+    /*private IEnumerator HideAfterDelay()
     {
         yield return new WaitForSeconds(revealDuration);
         DesactiveReveal();
         hideCoroutine = null; 
-    }
+    }*/
 
 }

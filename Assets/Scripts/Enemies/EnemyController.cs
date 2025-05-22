@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
 {
-    public enum EnemyState { Patrol, Chase }
+    public enum EnemyState { Patrol, Alerted, Chase }
     private EnemyState currentState = EnemyState.Patrol;
 
     [Header("Patrol points")]
@@ -42,6 +42,15 @@ public class EnemyController : MonoBehaviour
                 }
                 break;
 
+            case EnemyState.Alerted:
+                Alerted();
+                if (canSeePlayer)
+                {
+                    currentState = EnemyState.Chase;
+                    timeSinceLastSeen = 0f;
+                }
+                break;
+
             case EnemyState.Chase:
                 Chase();
                 if (canSeePlayer)
@@ -59,12 +68,30 @@ public class EnemyController : MonoBehaviour
                 }
                 break;
         }
+        Debug.Log("ESTADO: "+currentState);
     }
 
     void Patrol()
     {
         if (!agent.pathPending && agent.remainingDistance < 0.5f)
         {
+            GoNewPoint();
+        }
+    }
+    public void CheckAlert()
+    {
+        if (currentState != EnemyState.Chase)
+        {
+            currentState = EnemyState.Alerted;
+            agent.destination = player.position;
+        }
+    } 
+
+    void Alerted()
+    {
+        if (!agent.pathPending && agent.remainingDistance < 0.5f)
+        {
+            currentState = EnemyState.Patrol;
             GoNewPoint();
         }
     }

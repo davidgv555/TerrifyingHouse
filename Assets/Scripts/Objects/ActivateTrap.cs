@@ -4,6 +4,7 @@ using System.Collections;
 public class ActivateTrap : MonoBehaviour
 {
     private Animator anim;
+    public static event System.Action OnPlayerTakeDmgByTrapRequest;
 
     void Start()
     {
@@ -13,14 +14,15 @@ public class ActivateTrap : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.transform.name == "Player") {
+        if(other.CompareTag("Player") && other.transform == other.transform.root) {     
             anim.SetBool("Pressed", true);
             StartCoroutine(ResetPressed());
+            OnPlayerTakeDmgByTrapRequest?.Invoke();
         }
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.transform.name == "Player")
+        if (other.CompareTag("Player") && other.transform == other.transform.root)
         {
             anim.SetBool("Pressed", true);
             StartCoroutine(ResetPressed());

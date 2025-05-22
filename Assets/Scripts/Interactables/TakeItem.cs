@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TakeItem : MonoBehaviour, IInteractable
+public class TakeItem : InteractableBase
 {
     public Vector3 relativePosition = new Vector3(0f, 0f, 0f);
     public Vector3 relativeRotation = new Vector3(0f, 0f, 0f);
@@ -11,31 +11,36 @@ public class TakeItem : MonoBehaviour, IInteractable
 
     private void Start()
     {
+        myMaterials = GetComponent<Renderer>().materials;
         officialPosition = transform.position;
     }
 
-    public void Interact(Transform t)
+    public override void Interact(Transform t)
     {
         transform.parent = t;
-        transform.localRotation = Quaternion.identity;
         transform.localPosition = relativePosition;
+        transform.localRotation = Quaternion.identity;
         GetComponent<Rigidbody>().isKinematic = true;
         //GetComponent<BoxCollider>().enabled = false;
-        if(gameObject.name == "Linterna")
+        if (gameObject.name == "Linterna")
         {
             transform.localRotation = Quaternion.Euler(relativeRotation);
             transform.GetChild(0).gameObject.SetActive(true);
             GetComponent<FlashlightDetection>().UseFlashlight();
         }
-        else if (gameObject.tag == "Note")
+        else if (gameObject.CompareTag("Note"))
         {
             transform.localRotation = Quaternion.Euler(relativeRotation);
             Debug.Log("Take Note");
             GetComponentInParent<PlayerController>().canMove = false;
 
         }
-
     }
+    /*public void Interact(Transform t)
+    {
+        
+
+    }*/
 
     public void Drop()
     {
@@ -47,7 +52,7 @@ public class TakeItem : MonoBehaviour, IInteractable
             transform.GetChild(0).gameObject.SetActive(false);
             GetComponent<FlashlightDetection>().DropFlashlight();
         }
-        else if (gameObject.tag == "Note")
+        else if (gameObject.CompareTag("Note"))
         {
             Debug.Log("Drop Note");
             GetComponentInParent<PlayerController>().canMove = true;
@@ -64,4 +69,6 @@ public class TakeItem : MonoBehaviour, IInteractable
         GetComponent<BoxCollider>().enabled = true;
         gameObject.SetActive(false);
     }
+
+    
 }

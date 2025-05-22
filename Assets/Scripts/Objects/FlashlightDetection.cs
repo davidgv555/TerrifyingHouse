@@ -18,7 +18,7 @@ public class FlashlightDetection : MonoBehaviour
     {
         inUse = false;
     }
-    void OnTriggerStay(Collider other)
+    /*void OnTriggerStay(Collider other)
     {
         if (!inUse) return;
 
@@ -32,6 +32,29 @@ public class FlashlightDetection : MonoBehaviour
             r.Reveal();
         }
 
+    }*/
+    private void OnTriggerEnter(Collider other)
+    {
+        if (inUse & ((interactLayerMask.value & (1 << other.gameObject.layer)) != 0))
+        { 
+            Revealer r = other.GetComponent<Revealer>();
+            if (r != null)
+            {
+                r.Reveal();
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (inUse & ((interactLayerMask.value & (1 << other.gameObject.layer)) != 0))
+        {
+            Revealer r = other.GetComponent<Revealer>();
+            if (r != null)
+            {
+                r.Hide();
+            }
+        }
     }
 
 }

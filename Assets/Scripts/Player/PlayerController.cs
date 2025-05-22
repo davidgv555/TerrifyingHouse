@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 
 public class PlayerController : MonoBehaviour
@@ -26,17 +27,19 @@ public class PlayerController : MonoBehaviour
     public LayerMask interactLayerMask;
     private Camera playerCamera;
     private GameObject item;
+    public bool canMove = true;
 
 
     ///---------------------------
     /// Object Interactable -> Mask
     /// </summary>
-    [Header("Outliner")]
-    public Material materialOutliner;
 
-    private GameObject lastHighlightedObject = null;
+    private InteractableBase lastHighlightedObject = null;
 
-    public bool canMove = true;
+    ///---------------------------
+    /// Gravedad
+    /// </summary>
+    public float gravity = -9.81f;
 
 
     private void Awake()
@@ -64,6 +67,9 @@ public class PlayerController : MonoBehaviour
         // Subscribe to Look action events
         inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
+
+        PlayerTp.OnPlayerTpRequest += DoTp;
+        ActivateTrap.OnPlayerTakeDmgByTrapRequest += DamageTaken;
     }
     private void OnDisable()
     {
@@ -74,19 +80,26 @@ public class PlayerController : MonoBehaviour
     {
         if (canMove)
         {
-            HandleMovement();
-            HandleCameraRotation();
+            Gravity();
+            Movement();
+            CameraRotation();
             CheckForInteractableObject();
+
         }
     }
+    private void Gravity()
+    {
+        Vector3 moveGravity = new Vector3(0,gravity * Time.deltaTime,0);
+        characterController.Move(moveGravity);
+    }
 
-    private void HandleMovement()
+    private void Movement()
     {
         Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
         characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
     }
 
-    private void HandleCameraRotation()
+    private void CameraRotation()
     {
         float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
         float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
@@ -191,31 +204,29 @@ public class PlayerController : MonoBehaviour
             
             if (distanceToObject > 0.5f)
             {
-                GameObject objectRenderer = hit.collider.gameObject;
-                if (objectRenderer != null)
+                GameObject hitObject = hit.collider.gameObject;
+                if (hitObject != null && hitObject.TryGetComponent(out InteractableBase interactable))
                 {
-                    // Si hay un objeto interactuable, resaltar su borde con un shader
-                    if (lastHighlightedObject != objectRenderer)
+                    if (lastHighlightedObject != interactable)
                     {
-
-                        /*Material[] materials = new Material[2];
-                        materials[0] = objectRenderer.GetComponent<Renderer>().materials[0];
-                        materials[1] = materialOutliner;
-                        objectRenderer.GetComponent<Renderer>().materials = materials;*/
-                        Material[] materials = objectRenderer.GetComponent<Renderer>().materials;
-                        materials[1].SetFloat("_Alpha", 1f);
-                        //objectRenderer.GetComponent<Renderer>().materials = materials;
-                        //
-                        //Revisar bug OutlinerEncendido al dejar de mirar
-                        if(lastHighlightedObject != null)
+                        // Desactivar highlight del anterior
+                        if (lastHighlightedObject != null)
                         {
-                            Material[] materials2 = lastHighlightedObject.GetComponent<Renderer>().materials;
-                            materials2[1].SetFloat("_Alpha", 0f);
+                            lastHighlightedObject.Unhighlight();
+                        }
+                        // Activar highlight del nuevo
+                        interactable.Highlight();
+                        lastHighlightedObject = interactable;
+
+                        /*lastHighlightedObject.Unhighlight();
+
+                        if (lastHighlightedObject != null)
+                        {
+                            Material[] materials2 = lastHighlightedObject.GetComponent<InteractableBase>().myMaterials;
+                            materials2[materials.Length - 1].SetFloat("_Alpha", 0f);
                             lastHighlightedObject.GetComponent<Renderer>().materials = materials;
                         }
-                        //
-                        lastHighlightedObject = objectRenderer;
-
+                        lastHighlightedObject = objectRenderer;*/
                     }
                 }
             }
@@ -226,26 +237,39 @@ public class PlayerController : MonoBehaviour
             // Si no hay objeto en el rango, desactivamos el resaltado
             if (lastHighlightedObject != null)
             {
+                lastHighlightedObject.Unhighlight();
+                lastHighlightedObject = null;
+                /*
                 // Restauramos el material original
                 //Debug.Log("Reset Ant Color -> " + lastHighlightedObject.GetComponent<Renderer>().materials[1].name);
-                Material[] materials = lastHighlightedObject.GetComponent<Renderer>().materials;
-                materials[1].SetFloat("_Alpha", 0f);
+                Material[] materials = lastHighlightedObject.GetComponent<InteractableBase>().myMaterials;
+                materials[materials.Length - 1].SetFloat("_Alpha", 0f);
                 lastHighlightedObject.GetComponent<Renderer>().materials = materials;
                 //Debug.Log("Reset Des Color -> " + lastHighlightedObject.GetComponent<Renderer>().materials[1].name);
-                lastHighlightedObject = null;
+                lastHighlightedObject = null;*/
             }
         }
 
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.transform.tag == "Damage")
-        {
-            GetComponent<CharacterController>().enabled = false;
-            //transform.position = new Vector3(-9f, 3f, 3f);
-            transform.position = new Vector3(-38f, 3f, -3f);
-            GetComponent<CharacterController>().enabled = true;
-        }
+
+    
+    public void DamageTaken() {
+        characterController.enabled = false;
+        transform.position = new Vector3(-38f, 3f, -3f);
+        characterController.enabled = true;
     }
 
+    private void DoTp()
+    {
+        characterController.enabled = false;
+        transform.position = new Vector3(53.63f, 3f, -39f);
+        characterController.enabled = true;
+    }
+
+    /*private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Enemy") {
+            other.GetComponent<EnemyController>().CheckAlert();
+        }
+    }*/
 }

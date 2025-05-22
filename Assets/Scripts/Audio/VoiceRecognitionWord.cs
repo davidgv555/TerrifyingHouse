@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 
@@ -10,12 +11,13 @@ public class VoiceRecognitionWord : MonoBehaviour
     public float angleClosed = 0f;
     public Transform pivotDoor;
 
+    
+    private KeywordRecognizer keywordRecognizer;
     private Dictionary<string, System.Action> dicWordAction;
-    //private KeywordRecognizer keywordRecognizer;
-    private DictationRecognizer dictationRecognizer;
+    //private DictationRecognizer dictationRecognizer;
     private Quaternion rotationTarget;
     private bool doorOpen = false;
-    private string currentSpeech = "";
+    //private string currentSpeech = "";
     private bool playerInPosition = false;
 
 
@@ -23,20 +25,21 @@ public class VoiceRecognitionWord : MonoBehaviour
     {
         //pivotDoor = transform.parent;
 
-        dictationRecognizer = new DictationRecognizer();
+        /*dictationRecognizer = new DictationRecognizer();
 
         dictationRecognizer.DictationResult += OnSpeechRecognized;
         dictationRecognizer.DictationHypothesis += OnSpeechHypothesis;
         dictationRecognizer.DictationComplete += OnDictationComplete;
         dictationRecognizer.DictationError += OnDictationError;
-        dictationRecognizer.Start();
-        /*dicWordAction = new Dictionary<string, System.Action>();
-        dicWordAction.Add("abrir puerta", OpenDoor);
-        dicWordAction.Add("cerrar puerta", CloseDoor);
+        dictationRecognizer.Start();*/
+
+        dicWordAction = new Dictionary<string, System.Action>();
+        dicWordAction.Add("Teresa Teresa Teresa", OpenDoor);
+        //dicWordAction.Add("cerrar puerta", CloseDoor);
 
         keywordRecognizer = new KeywordRecognizer(dicWordAction.Keys.ToArray());
         keywordRecognizer.OnPhraseRecognized += RecognzeWord;
-        keywordRecognizer.Start();*/
+        keywordRecognizer.Start();
     }
 
     void Update()
@@ -52,7 +55,7 @@ public class VoiceRecognitionWord : MonoBehaviour
       
     }
 
-    private void OnDictationComplete(DictationCompletionCause completionCause)
+    /*private void OnDictationComplete(DictationCompletionCause completionCause)
     {
         if (completionCause != DictationCompletionCause.Complete)
         {
@@ -60,16 +63,16 @@ public class VoiceRecognitionWord : MonoBehaviour
             dictationRecognizer.Stop();
             dictationRecognizer.Start();
         }
-    }
+    }*/
 
-    private void OnDictationError(string error, int hresult)
+    /*private void OnDictationError(string error, int hresult)
     {
         Debug.LogError($"Dictation error: {error}; HResult = {hresult}");
         dictationRecognizer.Stop();
         dictationRecognizer.Start();
-    }
+    }*/
 
-    private void OnSpeechRecognized(string text, ConfidenceLevel confidence)
+    /*private void OnSpeechRecognized(string text, ConfidenceLevel confidence)
     {
         currentSpeech = text.ToLower();
         //Debug.Log("Jugador dijo: " + text);
@@ -83,18 +86,15 @@ public class VoiceRecognitionWord : MonoBehaviour
             }
             
         }
-        /*else if (ContainsTwoWordsWithinMargin(text, "cerrar", "puerta"))
-        {
-            CloseDoor();
-        }*/
-    }
-    private void OnSpeechHypothesis(string text)
+
+    }*/
+    /*private void OnSpeechHypothesis(string text)
     {
         // Mostrar lo que se está reconociendo en tiempo real mientras se habla.
-        Debug.Log("Hablando: " + text);
-    }
+        //Debug.Log("Hablando: " + text);
+    }*/
 
-    private bool ContainsTwoWordsWithinMargin(string text, string word1, string word2, string word3)
+    /*private bool ContainsTwoWordsWithinMargin(string text, string word1, string word2, string word3)
     {
         string[] words = text.Split(' ');
 
@@ -108,9 +108,9 @@ public class VoiceRecognitionWord : MonoBehaviour
         }
 
         return false;
-    }
+    }*/
 
-    private bool ContainsThreeWordsExact(string text, string word1, string word2, string word3)
+   /* private bool ContainsThreeWordsExact(string text, string word1, string word2, string word3)
     {
         string[] words = text.Split(' ');
 
@@ -123,7 +123,7 @@ public class VoiceRecognitionWord : MonoBehaviour
         }
 
         return false;
-    }
+    }*/
 
     private void RecognzeWord(PhraseRecognizedEventArgs word)
     {
@@ -133,14 +133,17 @@ public class VoiceRecognitionWord : MonoBehaviour
 
     private void OpenDoor()
     {
-        doorOpen=true;
-        rotationTarget = Quaternion.Euler(0, angleOpen, 0);
+        if (playerInPosition)
+        {
+            doorOpen = true;
+            rotationTarget = Quaternion.Euler(0, angleOpen, 0);
+        }
     }
-    private void CloseDoor()
+    /*private void CloseDoor()
     {
         doorOpen = false;
         rotationTarget = Quaternion.Euler(0, angleClosed, 0);
-    }
+    }*/
 
     private void OnTriggerEnter(Collider other)
     {

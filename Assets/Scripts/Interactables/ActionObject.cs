@@ -1,9 +1,17 @@
 using System.Collections;
 using UnityEngine;
 
-public class ActionObject : MonoBehaviour, IInteractable
+public class ActionObject : InteractableBase
 {
-    public void Interact(Transform t)
+    /*public void Interact(Transform t)
+    {
+        
+    }*/
+    private void Start()
+    {
+        myMaterials = GetComponent<Renderer>().materials;
+    }
+    public override void Interact(Transform t)
     {
         PushButton();
     }
