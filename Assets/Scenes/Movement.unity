@@ -566,7 +566,8 @@ MonoBehaviour:
   interactLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  materialOutliner: {fileID: 2100000, guid: 32db6aef2b56b914fbb559347c9abd2b, type: 2}
+  canMove: 1
+  gravity: -9.81
 --- !u!54 &588354221
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1063,6 +1064,7 @@ MonoBehaviour:
   speed: 2
   angleOpen: 180
   angleClosed: 90
+  pivotDoor: {fileID: 0}
 --- !u!65 &1147570533
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1796,6 +1798,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39050a465994bcb44a22a92d22977d51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myMaterials: []
 --- !u!1 &2055144585
 GameObject:
   m_ObjectHideFlags: 0
@@ -2040,7 +2043,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05e13146699183048a5cb6fa27771159, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myMaterials: []
   relativePosition: {x: 0.5, y: -0.2, z: 1}
+  relativeRotation: {x: 0, y: 0, z: 0}
+  id: 0
+  usableOneTime: 0
 --- !u!54 &2104021751
 Rigidbody:
   m_ObjectHideFlags: 0

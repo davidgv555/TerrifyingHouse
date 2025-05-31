@@ -8,9 +8,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/VoiceRecognition.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Demo.unity
     guid: 0550f8b7404056741b98cd569657d535
+  - enabled: 1
+    path: Assets/Scenes/MenuInicial.unity
+    guid: b232803ae6381674b86b3ed8872abd80
+  - enabled: 0
+    path: Assets/Scenes/PruebaDF.unity
+    guid: 8848ed452129c574094dd661e0e54fc8
+  - enabled: 1
+    path: Assets/Scenes/DemoFinal.unity
+    guid: 97557dfd220e2d042ac3978d2e051a3c
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 32bb828df8286e641a9ffa8d0a2801b5, type: 3}
   m_UseUCBPForAssetBundles: 0

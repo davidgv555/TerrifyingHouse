@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,54 +8,97 @@ using UnityEngine.Windows.Speech;
 public class VoiceRecognitionWord : MonoBehaviour
 {
     public float speed = 2f;
-    public float angleOpen = 90f; 
-    public float angleClosed = 0f;
-    public Transform pivotDoor;
+    public ActionDoor door;
+    public GameObject player;
+    public GameObject enemy;
 
-    
+
     private KeywordRecognizer keywordRecognizer;
     private Dictionary<string, System.Action> dicWordAction;
-    //private DictationRecognizer dictationRecognizer;
-    private Quaternion rotationTarget;
-    private bool doorOpen = false;
-    //private string currentSpeech = "";
     private bool playerInPosition = false;
+    private GameObject enemyAnim;
+    private GameObject camera;
+    private Animator anim;
+    private bool actionDone =false;
+
+    //Reconocimiento de Voz activa
+    //private DictationRecognizer dictationRecognizer;
+    //private string currentSpeech = "";
 
 
     void Start()
     {
-        //pivotDoor = transform.parent;
+        enemyAnim = transform.GetChild(0).gameObject;
+        camera = transform.GetChild(1).gameObject;
+        anim = GetComponent<Animator>();
 
+        dicWordAction = new Dictionary<string, System.Action>();
+        dicWordAction.Add("Teresa Teresa Teresa", OpenDoor);
+        keywordRecognizer = new KeywordRecognizer(dicWordAction.Keys.ToArray());
+        keywordRecognizer.OnPhraseRecognized += RecognzeWord;
+        keywordRecognizer.Start();
+
+        //Reconocimiento de Voz activa
         /*dictationRecognizer = new DictationRecognizer();
-
         dictationRecognizer.DictationResult += OnSpeechRecognized;
         dictationRecognizer.DictationHypothesis += OnSpeechHypothesis;
         dictationRecognizer.DictationComplete += OnDictationComplete;
         dictationRecognizer.DictationError += OnDictationError;
         dictationRecognizer.Start();*/
-
-        dicWordAction = new Dictionary<string, System.Action>();
-        dicWordAction.Add("Teresa Teresa Teresa", OpenDoor);
-        //dicWordAction.Add("cerrar puerta", CloseDoor);
-
-        keywordRecognizer = new KeywordRecognizer(dicWordAction.Keys.ToArray());
-        keywordRecognizer.OnPhraseRecognized += RecognzeWord;
-        keywordRecognizer.Start();
     }
 
-    void Update()
+    private void RecognzeWord(PhraseRecognizedEventArgs word)
     {
-        if((!doorOpen && pivotDoor.transform.rotation.y != angleClosed) || (doorOpen && pivotDoor.transform.rotation.y != angleOpen))
-        {
-            pivotDoor.rotation = Quaternion.RotateTowards(
-                  pivotDoor.rotation,
-                  rotationTarget,
-                  speed * Time.deltaTime * 100
-              );
-        }
-      
+        Debug.Log(word.text);
+        dicWordAction[word.text].Invoke();
     }
 
+    private void OpenDoor()
+    {
+        if (!actionDone & playerInPosition)
+        {
+            actionDone = true;
+            StartCoroutine(AnimationDone());
+            StartCoroutine(RecoverPlayer());
+            camera.SetActive(true);
+            enemyAnim.SetActive(true);
+            enemyAnim.GetComponent<AudioSource>().Play();
+            player.SetActive(false);
+            anim.SetBool("Action", true);
+        }
+    }
+    IEnumerator RecoverPlayer()
+    {
+        yield return new WaitForSeconds(3f);
+        player.SetActive(true);
+        camera.SetActive(false);
+
+    }
+    IEnumerator AnimationDone()
+    {
+        yield return new WaitForSeconds(4f);
+        enemyAnim.SetActive(false);
+        door.OpenDoorWithSound();
+        enemy.SetActive(true);
+        GameProgress.SaveMilestone("puerta3");
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.name == "Player")
+        {
+            playerInPosition = true;
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.name == "Player")
+        {
+            playerInPosition = false;
+        }
+    }
+
+    //Reconocimiento de Voz activa
     /*private void OnDictationComplete(DictationCompletionCause completionCause)
     {
         if (completionCause != DictationCompletionCause.Complete)
@@ -110,53 +154,18 @@ public class VoiceRecognitionWord : MonoBehaviour
         return false;
     }*/
 
-   /* private bool ContainsThreeWordsExact(string text, string word1, string word2, string word3)
-    {
-        string[] words = text.Split(' ');
+    /* private bool ContainsThreeWordsExact(string text, string word1, string word2, string word3)
+     {
+         string[] words = text.Split(' ');
 
-        for (int i = 0; i < words.Length - 2; i++)
-        {
-            if (words[i] == word1 && words[i + 1] == word2 && words[i + 2] == word3)
-            {
-                return true;
-            }
-        }
+         for (int i = 0; i < words.Length - 2; i++)
+         {
+             if (words[i] == word1 && words[i + 1] == word2 && words[i + 2] == word3)
+             {
+                 return true;
+             }
+         }
 
-        return false;
-    }*/
-
-    private void RecognzeWord(PhraseRecognizedEventArgs word)
-    {
-        Debug.Log(word.text);
-        dicWordAction[word.text].Invoke();
-    }
-
-    private void OpenDoor()
-    {
-        if (playerInPosition)
-        {
-            doorOpen = true;
-            rotationTarget = Quaternion.Euler(0, angleOpen, 0);
-        }
-    }
-    /*private void CloseDoor()
-    {
-        doorOpen = false;
-        rotationTarget = Quaternion.Euler(0, angleClosed, 0);
-    }*/
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.name == "Player")
-        {
-            playerInPosition = true;
-        }
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.name == "Player")
-        {
-            playerInPosition = false;
-        }
-    }
+         return false;
+     }*/
 }

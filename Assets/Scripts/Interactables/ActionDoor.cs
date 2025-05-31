@@ -8,17 +8,23 @@ public class ActionDoor : InteractableBase
     public bool usableOneTime = false;
     public int idUsable;
     public bool isOpen = false;
-
+    public bool officialDoor = true;
+    public AudioClip[] audioClips;
     public override bool haveOutline => false;
 
     private Transform pivotDoor;
     private Quaternion rotationTarget;
-    
+    private AudioSource audio;
+
 
     void Start()
     {
         pivotDoor = transform.parent;
         myMaterials = GetComponent<Renderer>().materials;
+        if (officialDoor)
+        {
+            audio = GetComponent<AudioSource>();
+        }
     }
     void Update()
     {
@@ -40,15 +46,17 @@ public class ActionDoor : InteractableBase
         }
         else
         {
-            DoOnlyAction();
+            if (t.name != "Player") {
+                DoOnlyAction();
+            }
+            else
+            {
+                DoNothingAction();
+            }
+            
         }
     }
-    /*
-    public void Interact(Transform t)
-    {
-        
-        
-    }*/
+  
 
     private void DoActionDoor()
     {
@@ -56,11 +64,21 @@ public class ActionDoor : InteractableBase
         {
             isOpen = true;
             rotationTarget = Quaternion.Euler(0, angleOpen, 0);
+            if (officialDoor)
+            {
+                audio.clip = audioClips[0];
+                audio.Play();
+            }
         }
         else
         {
             isOpen = false;
             rotationTarget = Quaternion.Euler(0, angleClosed, 0);
+            if (officialDoor)
+            {
+                audio.clip = audioClips[1];
+                audio.Play();
+            }
         }
       
     }
@@ -69,7 +87,40 @@ public class ActionDoor : InteractableBase
         isOpen = true;
         rotationTarget = Quaternion.Euler(0, angleOpen, 0);
         this.gameObject.layer = 0;
+        if (officialDoor)
+        {
+            audio.clip = audioClips[0];
+            audio.Play();
+        }
     }
 
-    
+    private void DoNothingAction()
+    {
+        if (officialDoor)
+        {
+            audio.clip = audioClips[2];
+            audio.Play();
+        }
+    }
+
+    public void OpenDoorWithSound()
+    {
+        isOpen = true;
+        rotationTarget = Quaternion.Euler(0, angleOpen, 0);
+        audio.clip = audioClips[0];
+        audio.Play();
+    }
+    public void CloseDoor()
+    {  
+        isOpen = false;
+        rotationTarget = Quaternion.Euler(0, angleClosed, 0);
+    }
+    public void CloseDoorWithSound()
+    {
+        this.gameObject.layer = 6;
+        isOpen = false;
+        rotationTarget = Quaternion.Euler(0, angleClosed, 0);
+        audio.clip = audioClips[1];
+        audio.Play();
+    }
 }

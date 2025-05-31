@@ -6,6 +6,7 @@ public class LockController : MonoBehaviour
     public float speed = 2f;
     public float angleOpen = 90f;
     public float angleClosed = 0f;
+    public ActionDoor doorRoom;
 
     private Transform pivotDoor;
     private Quaternion rotationTarget;
@@ -44,7 +45,7 @@ public class LockController : MonoBehaviour
 
         if (success)
         {
-            Debug.Log("Gané");
+            doorRoom.OpenDoorWithSound();
             isOpen = true;
             rotationTarget = Quaternion.Euler(0, angleClosed, 0);
         }

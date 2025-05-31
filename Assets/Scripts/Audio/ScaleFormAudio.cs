@@ -4,7 +4,6 @@ using UnityEngine.UI;
 public class ScaleFormAudio : MonoBehaviour
 {
     public Image noiseBar;
-    public AudioSource source;
     public NoiseDetection detector;
 
     public float minScale = 0f;

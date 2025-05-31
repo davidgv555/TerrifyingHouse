@@ -5,7 +5,9 @@ using UnityEngine.AI;
 public class EnemyController : MonoBehaviour
 {
     public enum EnemyState { Patrol, Alerted, Chase }
+    public static event System.Action OnPlayerDead; 
     private EnemyState currentState = EnemyState.Patrol;
+    private Animator anim;
 
     [Header("Patrol points")]
     public List<Transform> patrolPoints;
@@ -17,13 +19,16 @@ public class EnemyController : MonoBehaviour
     public LayerMask obstacleLayer;
 
     [Header("Chase")]
-    public float forgetTime = 5f; 
+    public float forgetTime = 5f;
+    public float distanceKill = 0.5f;
     private float timeSinceLastSeen;
+   
 
     private NavMeshAgent agent;
 
     private void Start()
     {
+        anim = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         GoNewPoint();
     }
@@ -107,6 +112,17 @@ public class EnemyController : MonoBehaviour
         if (player != null)
         {
             agent.destination = player.position;
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            //Debug.Log("Distance: " + distanceToPlayer);
+            if (distanceToPlayer <= distanceKill)
+            {
+                //Debug.Log("Distance: " + distanceToPlayer + " - DK: "+distanceKill);
+                OnPlayerDead?.Invoke();
+                agent.enabled = false;
+                transform.position = new Vector3(15.8f, 1.719f, -67.909f);
+                agent.enabled = true;
+                currentState = EnemyState.Patrol;
+            }
         }
     }
 

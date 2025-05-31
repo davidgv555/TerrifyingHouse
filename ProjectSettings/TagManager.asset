@@ -8,18 +8,19 @@ TagManager:
   - Note
   - Enemy
   - Tp
+  - Key
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - InteractatLayer
+  - InteractLayer
   - DetectionReveal
   - ObstaclesEnemies
-  - Ground
-  - 
+  - Enemy
+  - GrabItem
   - 
   - 
   - 
@@ -44,6 +45,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: InteractatLayer
+    uniqueID: 2594373017
+    locked: 0
+  - name: Ground
+    uniqueID: 303430853
     locked: 0
   m_RenderingLayers:
   - Default

@@ -913,6 +913,7 @@ MonoBehaviour:
   speed: 2
   angleOpen: 90
   angleClosed: 0
+  pivotDoor: {fileID: 0}
 --- !u!65 &1459121154
 BoxCollider:
   m_ObjectHideFlags: 0

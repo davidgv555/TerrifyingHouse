@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -42,6 +43,14 @@ public class PlayerController : MonoBehaviour
     public float gravity = -9.81f;
 
 
+    ///---------------------------
+    /// Damage
+    /// </summary>
+    public GameObject dmg;
+    public SpikesJumpscare sjump;
+    private AudioSource audio;
+
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
@@ -55,6 +64,7 @@ public class PlayerController : MonoBehaviour
         playerCameraTransform = GetComponentInChildren<Camera>().transform;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        audio = GetComponent<AudioSource>();
     }
     private void OnEnable()
     {
@@ -70,10 +80,14 @@ public class PlayerController : MonoBehaviour
 
         PlayerTp.OnPlayerTpRequest += DoTp;
         ActivateTrap.OnPlayerTakeDmgByTrapRequest += DamageTaken;
+        EnemyController.OnPlayerDead += AttackEnemy;
     }
     private void OnDisable()
     {
         inputActions.Disable();
+        PlayerTp.OnPlayerTpRequest -= DoTp;
+        ActivateTrap.OnPlayerTakeDmgByTrapRequest -= DamageTaken;
+        EnemyController.OnPlayerDead -= AttackEnemy;
     }
     
     private void Update()
@@ -128,6 +142,9 @@ public class PlayerController : MonoBehaviour
                         {
                             interactable.Interact(playerCameraTransform);
                         }
+                        else {
+                            interactable.Interact(this.transform);
+                        }
                     }
                     else 
                     {
@@ -164,7 +181,26 @@ public class PlayerController : MonoBehaviour
                             {
                                 interactable.Interact(playerCameraTransform);
                                 item.GetComponent<TakeItem>().DropDefinitive();
+                                switch(item.GetComponent<TakeItem>().id)
+                                {
+                                    case 1:
+                                        GameProgress.SaveMilestone("puerta1");
+                                        break;
+                                    case 2:
+                                        GameProgress.SaveMilestone("puerta2");
+                                        break;
+                                    case 3:
+                                        GameProgress.SaveMilestone("puerta4");
+                                        break;
+                                    default:
+                                        break;
+                                }
                                 item = null;
+                            }
+                            else if (item2.GetComponent<ActionDoor>() && item2.GetComponent<ActionDoor>().usableOneTime
+                                && item2.GetComponent<ActionDoor>().idUsable != item.GetComponent<TakeItem>().id)
+                            {
+                                interactable.Interact(this.transform);
                             }
                             else if (item2.GetComponent<ActionDoor>() && !item2.GetComponent<ActionDoor>().usableOneTime)
                             {
@@ -252,24 +288,50 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    
-    public void DamageTaken() {
+    private void DamageTaken() {
+        dmg.SetActive(true);
+        dmg.GetComponent<Animator>().SetBool("Action", true);
+        StartCoroutine(ImageDmgRecover());
+        //audio.Play();
         characterController.enabled = false;
-        transform.position = new Vector3(-38f, 3f, -3f);
+        transform.position = new Vector3(-28.34f, transform.position.y, -76.288f);
         characterController.enabled = true;
+        canMove = false;
+        sjump.DoAction();
+    }
+    private void AttackEnemy()
+    {
+        dmg.SetActive(true);
+        dmg.GetComponent<Animator>().SetBool("Action", true);
+        
+        StartCoroutine(ImageDmgRecover());
+        audio.Play();
+        characterController.enabled = false;
+        transform.position = new Vector3(-8.552f, transform.position.y, -71.511f);
+        characterController.enabled = true;
+        canMove = false;
+    }
+    IEnumerator ImageDmgRecover()
+    {
+        yield return new WaitForSeconds(1.5f);
+        dmg.GetComponent<Animator>().SetBool("Action", false);
+        dmg.SetActive(false);
+        canMove = true;
+
+
     }
 
-    private void DoTp()
+        private void DoTp(float variation)
     {
         characterController.enabled = false;
-        transform.position = new Vector3(53.63f, 3f, -39f);
+        transform.position = new Vector3(-100.4f, transform.position.y, -91.03f-variation);
         characterController.enabled = true;
     }
 
-    /*private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Enemy") {
             other.GetComponent<EnemyController>().CheckAlert();
         }
-    }*/
+    }
 }

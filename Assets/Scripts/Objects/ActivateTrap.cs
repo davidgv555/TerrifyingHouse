@@ -3,12 +3,16 @@ using System.Collections;
 
 public class ActivateTrap : MonoBehaviour
 {
-    private Animator anim;
+
     public static event System.Action OnPlayerTakeDmgByTrapRequest;
+
+    private Animator anim;
+    private AudioSource audio;
 
     void Start()
     {
         anim = GetComponentInParent<Animator>();
+        audio = GetComponent<AudioSource>();
     }
 
 
@@ -16,16 +20,9 @@ public class ActivateTrap : MonoBehaviour
     {
         if(other.CompareTag("Player") && other.transform == other.transform.root) {     
             anim.SetBool("Pressed", true);
+            audio.Play();
             StartCoroutine(ResetPressed());
             OnPlayerTakeDmgByTrapRequest?.Invoke();
-        }
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player") && other.transform == other.transform.root)
-        {
-            anim.SetBool("Pressed", true);
-            StartCoroutine(ResetPressed());
         }
     }
 
