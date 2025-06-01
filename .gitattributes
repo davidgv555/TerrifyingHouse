@@ -5,3 +5,12 @@
 *.resS filter=lfs diff=lfs merge=lfs -text
 *.fbx binary
 *.FBX binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tga binary
+*.psd binary
+*.bmp binary
+*.gif binary
+*.mp3 binary
+*.mp4 binary
